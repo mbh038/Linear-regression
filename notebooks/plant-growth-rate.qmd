@@ -1,0 +1,100 @@
+---
+title: "Linear regression"
+author: "your name"
+date: "the date"
+format: html
+editor: visual
+---
+
+We will do a linear regression analysis ofthe `plant.growth.rate.csv` dataset, to see how sensetive (if at all) plant growth rate is to soil moisture content.
+
+## Load packages
+If any of these do not load, you need to install them first using, for example  `install.packages("ggfortify")
+```{r}
+library(tidyverse)
+library(here)
+library(ggfortify)
+library(cowplot)
+```
+
+## Load data
+```{r}
+filepath <- here("data","plant.growth.rate.csv")
+plants <- read_csv(fliepath)
+glimpse(plants)
+```
+
+## Plot the data
+
+This chunk uses the `ggplot2` package from `tidyverse` to plot a scatter plot of plant growth rate vs soil moisture content.
+
+```{r}
+plants |>
+  ggplot(aes(x = soil.moisture.content, y = plant.growth.rate)) +
+  geom_point() +
+  labs(x="Soil moisture content",
+       y="Plant growth rate (mm/week)") +
+  xlim(0,2) +
+  ylim(0,50) +
+  theme_cowplot()
+```
+
+* what is the response (dependent) variable here, and what is the independent variable?
+* Is there a plausibly linear relationship between the two?
+* Is the variance of the response approximately constant across the whole range of the independent variable
+* How sensetive is the response to the independent variable? Thatis, by how much does it change if the independent variable increases by one unit?
+
+## Make a linear model of the response of plant growth rate to soil moisture content
+
+```{r}
+model_pgr<-lm(plant.growth.rate ~ soil.moisture.content, data = plants)
+```
+
+## Check assumptions
+
+```{r}
+autoplot(model_pgr, smooth.colour=NA) + theme_cowplot()
+```
+
+All of these figures are important, but most of all, the top left and top-right figures. On the basis of these, do you think the linear model is a valid tool for anlysis of this data?
+
+## Interpret the model
+
+First we use `anova()` to tell us whether there is any evidence from the data for a response of plant growth rate to soil moisture content.
+
+```{r}
+anova(model_pgr)
+```
+
+* What is the null hypothesis of this model?
+* What does the F value tell you?
+* Do we reject or fail to reject the null hypothesis?
+
+Now we move on to the `summary()` function to determine the size of the effect:
+
+```{r}
+summary(model_pgr)
+```
+
+* How sensitive is plant growth rate to soil moisture content?
+* Does this value agree more or less with your estimate from the graph you plotted?
+* What does the adjusted r-squared value tell you?
+
+## Add the linear regression line to the plot
+You can do this by amending the previous code chunk for plotting by yhe inclusion of one `geom_smooth()` call, using the argument `method = "lm"`
+
+```{r}
+plants |>
+  ggplot(aes(x=soil.moisture.content, y=plant.growth.rate)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  labs(x="Soil moisture content",
+       y="Plant growth rate (mm/week)") +
+  xlim(0,2) +
+  ylim(0,50) +
+  theme_cowplot()
+```
+
+## Report the result
+
+Read a suggestion for how to do this in the session notes, then try to write your own version.
